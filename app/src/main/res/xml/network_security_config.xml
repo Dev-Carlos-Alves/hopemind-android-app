@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  A API local do HopeMind roda em HTTP (sem TLS) durante o desenvolvimento.
+  Liberamos texto claro para permitir o emulador (10.0.2.2) e celulares na mesma rede Wi-Fi.
+  Em produção a API deve usar HTTPS e esta liberação deve ser removida.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>
