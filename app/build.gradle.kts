@@ -27,7 +27,7 @@ android {
     }
 
     namespace = "br.edu.novaroma.hopemind"
-    compileSdk = 37
+    compileSdk = 35
     defaultConfig {
         applicationId = "br.edu.novaroma.hopemind"
         minSdk = 24
