@@ -15,7 +15,12 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.foundation.clickable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import br.edu.novaroma.hopemind.presentation.screen.PatientProfileSheet
+import br.edu.novaroma.hopemind.presentation.screen.PsychologistCardSheet
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -91,6 +96,12 @@ fun AppointmentsRoute(user: User, padding: PaddingValues, onSeeRecommendations: 
 fun AppointmentsContent(user: User, state: AppointmentsState, padding: PaddingValues, onSeeRecommendations: () -> Unit) {
     val c = HopeTheme.colors
     var tab by rememberSaveable { mutableIntStateOf(0) }
+    // Perfil da outra pessoa da sessão (paciente para o psicólogo, psicólogo para o paciente).
+    var selected by remember { mutableStateOf<Appointment?>(null) }
+    selected?.let { a ->
+        a.paciente?.let { PatientProfileSheet(it, onDismiss = { selected = null }) }
+        a.psicologo?.let { PsychologistCardSheet(it, onDismiss = { selected = null }) }
+    }
     val now = LocalDateTime.now()
     val upcoming = tab == 0
     val list = state.items
@@ -157,7 +168,7 @@ fun AppointmentsContent(user: User, state: AppointmentsState, padding: PaddingVa
                         Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(Radius.md)).background(c.bgElevated)) {
                             entries.forEachIndexed { i, (item, time) ->
                                 if (i > 0) HorizontalDivider(Modifier.padding(start = 138.dp), thickness = 0.5.dp, color = c.separator)
-                                AppointmentRow(item, time, user.isPsychologist)
+                                AppointmentRow(item, time, user.isPsychologist, onOpen = { selected = item })
                             }
                         }
                     }
@@ -168,7 +179,7 @@ fun AppointmentsContent(user: User, state: AppointmentsState, padding: PaddingVa
 }
 
 @Composable
-private fun AppointmentRow(item: Appointment, time: LocalDateTime, isPsychologist: Boolean) {
+private fun AppointmentRow(item: Appointment, time: LocalDateTime, isPsychologist: Boolean, onOpen: () -> Unit = {}) {
     val c = HopeTheme.colors
     val other = if (isPsychologist) item.pacienteNome else item.psicologoNome
     val (status, tone) = when (item.status) {
@@ -176,7 +187,15 @@ private fun AppointmentRow(item: Appointment, time: LocalDateTime, isPsychologis
         AppointmentStatus.COMPLETED -> R.string.status_completed to PillTone.NEUTRAL
         AppointmentStatus.CANCELLED -> R.string.status_cancelled to PillTone.DANGER
     }
-    Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 14.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+    val hasProfile = item.paciente != null || item.psicologo != null
+    val openLabel = stringResource(R.string.profile_open, other)
+    Row(
+        Modifier.fillMaxWidth()
+            .then(if (hasProfile) Modifier.clickable(onClickLabel = openLabel, onClick = onOpen) else Modifier)
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         Text(
             time.format(DateTimeFormatter.ofPattern("HH:mm")),
             style = HopeTheme.type.title3.copy(fontWeight = FontWeight.Bold),

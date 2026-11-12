@@ -8,7 +8,9 @@ import br.edu.novaroma.hopemind.domain.model.Appointment
 import br.edu.novaroma.hopemind.domain.model.CepAddress
 import br.edu.novaroma.hopemind.domain.model.BookRequest
 import br.edu.novaroma.hopemind.domain.model.LoginRequest
+import br.edu.novaroma.hopemind.domain.model.ForgotPasswordRequest
 import br.edu.novaroma.hopemind.domain.model.ProfessionalProfileRequest
+import br.edu.novaroma.hopemind.domain.model.ResetPasswordRequest
 import br.edu.novaroma.hopemind.domain.model.PsychologistInfo
 import br.edu.novaroma.hopemind.domain.model.RefreshRequest
 import br.edu.novaroma.hopemind.domain.model.MatchResponse
@@ -40,11 +42,19 @@ class AuthRepository(private val container: AppContainer) {
     /** A sessão de um novo login fica só na memória até a pessoa responder "manter conectado?". */
     suspend fun login(email: String, password: String): Result<User> {
         container.client.cookies.persist = false
-        return apiCall("Não foi possível entrar. Verifique suas credenciais.") { api.login(LoginRequest(email.trim(), password)).user }
+        return apiCall("Não foi possível entrar. Verifique seus dados.") { api.login(LoginRequest(email.trim(), password)).user }
             .onSuccess { _user.value = it }
     }
 
     val keepSignedIn: Boolean get() = container.prefs.keepSignedIn
+
+    /** Esqueci minha senha (1/2): a API envia um código de 6 dígitos para o e-mail da conta. */
+    suspend fun forgotPassword(login: String): Result<String> =
+        apiCall("Não foi possível enviar o código.") { api.forgotPassword(ForgotPasswordRequest(login.trim())).message }
+
+    /** Esqueci minha senha (2/2): troca a senha com o código recebido. */
+    suspend fun resetPassword(login: String, code: String, password: String): Result<String> =
+        apiCall("Não foi possível redefinir a senha.") { api.resetPassword(ResetPasswordRequest(login.trim(), code.filter(Char::isDigit), password)).message }
 
     /**
      * "Manter conectado": grava (ou apaga) a sessão no aparelho e avisa a API, que passa a

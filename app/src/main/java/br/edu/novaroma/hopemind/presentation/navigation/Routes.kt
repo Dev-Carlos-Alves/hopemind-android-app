@@ -16,6 +16,7 @@ object Routes {
     const val WELCOME = "welcome"
     const val LOGIN = "login"
     const val REGISTER = "register"
+    const val FORGOT = "forgot"
     const val HOME = "home"
     const val MATCHES = "matches"
     const val SESSIONS = "sessions"
