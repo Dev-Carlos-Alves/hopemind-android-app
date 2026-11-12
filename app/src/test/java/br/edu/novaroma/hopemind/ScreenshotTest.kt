@@ -129,6 +129,9 @@ class ScreenshotTest {
     @Test fun t24_settingsKeepSignedIn() = shot("24_ajustes_manter_conectado") {
         InTabs(ana, Routes.SETTINGS) { SettingsContent(ana, profile, ThemeMode.AUTO, "http://10.0.2.2:3000/api/", it, {}, {}, {}, {}, {}, keepSignedIn = true) }
     }
+    @Test fun t25_settingsPsychologist() = shot("25_ajustes_psicologo") {
+        InTabs(rafael, Routes.SETTINGS) { SettingsContent(rafael, psyProfile, ThemeMode.AUTO, "http://10.0.2.2:3000/api/", it, {}, {}, {}, {}, {}, keepSignedIn = true) }
+    }
     @Test fun t20_homeFull() = shot("20_home_inteira") { InTabs(ana, Routes.HOME) { HomeScreen(ana, it, {}, {}, {}) } }
 
     @Config(qualifiers = "pt-rBR-w393dp-h3600dp-mdpi")
@@ -181,6 +184,7 @@ class ScreenshotTest {
                 psychologist = MatchPsychologist(
                     i + 1, name, "CRP 02/${12345 + i}", "Terapia Cognitivo-Comportamental", listOf("TCC", "ACT"), null, "150.00",
                     if (inPersonOnly) listOf("presencial") else listOf("online", "presencial"), bairro, "Recife",
+                    contactLink = if (i == 0) "https://wa.me/5581999990000" else null,
                 ),
             )
         },
@@ -232,6 +236,14 @@ class ScreenshotTest {
         Appointment(1, at(1, 14), AppointmentStatus.SCHEDULED, "Rafael Moura", "Ana Souza", "Terapia Cognitivo-Comportamental", "CRP 02/12345"),
         Appointment(2, at(1, 19), AppointmentStatus.SCHEDULED, "Larissa Cavalcanti", "Ana Souza", "Terapia Cognitivo-Comportamental", "CRP 02/18231"),
         Appointment(3, at(6, 18), AppointmentStatus.SCHEDULED, "Rafael Moura", "Ana Souza", "Terapia Cognitivo-Comportamental", "CRP 02/12345"),
+    )
+
+    private val psyProfile = Profile(
+        2, "Rafael Moura", "rafael@hopemind.local", "81988887777", "1985-01-01", "Masculino", UserType.PSYCHOLOGIST, true,
+        psychologist = br.edu.novaroma.hopemind.domain.model.PsychologistInfo(
+            1, "CRP 02/12345", "Psicologia clínica", "TCC", "Atendo adultos com ansiedade.", "150.00", "https://wa.me/5581988887777",
+        ),
+        cep = "52050-000", street = "Rua das Graças", addressNumber = "10", neighborhood = "Graças", city = "Recife", state = "PE",
     )
 
     private val profile = Profile(

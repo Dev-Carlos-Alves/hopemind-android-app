@@ -8,6 +8,8 @@ import br.edu.novaroma.hopemind.domain.model.Appointment
 import br.edu.novaroma.hopemind.domain.model.CepAddress
 import br.edu.novaroma.hopemind.domain.model.BookRequest
 import br.edu.novaroma.hopemind.domain.model.LoginRequest
+import br.edu.novaroma.hopemind.domain.model.ProfessionalProfileRequest
+import br.edu.novaroma.hopemind.domain.model.PsychologistInfo
 import br.edu.novaroma.hopemind.domain.model.RefreshRequest
 import br.edu.novaroma.hopemind.domain.model.MatchResponse
 import br.edu.novaroma.hopemind.domain.model.MySubmission
@@ -62,6 +64,10 @@ class AuthRepository(private val container: AppContainer) {
     }
 
     suspend fun profile(): Result<Profile> = apiCall { api.me() }
+
+    /** US-11: o psicólogo atualiza o perfil exibido nas recomendações. */
+    suspend fun updateProfessionalProfile(request: ProfessionalProfileRequest): Result<PsychologistInfo> =
+        apiCall("Não foi possível salvar o perfil.") { api.updateProfessionalProfile(request) }
 
     /** O servidor resolve o CEP e calcula as coordenadas; o app só manda o CEP. */
     suspend fun updateAddress(cep: String, number: String?): Result<ProfileAddress> =

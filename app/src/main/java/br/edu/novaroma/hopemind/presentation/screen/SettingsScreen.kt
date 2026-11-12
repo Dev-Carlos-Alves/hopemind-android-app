@@ -14,7 +14,10 @@ import androidx.compose.material.icons.rounded.Badge
 import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.Dns
 import androidx.compose.material.icons.rounded.Email
+import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material.icons.rounded.Link
+import androidx.compose.material.icons.rounded.Spa
 import androidx.compose.material.icons.rounded.Payments
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Phone
@@ -65,6 +68,7 @@ fun SettingsRoute(user: User, padding: PaddingValues, onQuestionnaire: () -> Uni
     val theme by container.prefs.theme.collectAsStateWithLifecycle()
     var showServer by remember { mutableStateOf(false) }
     var keepSignedIn by remember { mutableStateOf(container.auth.keepSignedIn) }
+    var editingProfessional by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     LaunchedEffect(Unit) { profile = container.auth.profile().getOrNull() }
 
@@ -72,7 +76,14 @@ fun SettingsRoute(user: User, padding: PaddingValues, onQuestionnaire: () -> Uni
         user, profile, theme, container.prefs.apiUrl, padding, container.prefs::setTheme, onQuestionnaire, onAbout, { showServer = true }, onLogout,
         keepSignedIn = keepSignedIn,
         onKeepSignedIn = { keep -> keepSignedIn = keep; scope.launch { container.auth.setKeepSignedIn(keep) } },
+        onEditProfessional = { editingProfessional = true },
     )
+    val psy = profile?.psychologist
+    if (editingProfessional && psy != null) {
+        ProfessionalProfileSheet(psy, onDismiss = { editingProfessional = false }) { saved ->
+            profile = profile?.copy(psychologist = saved)
+        }
+    }
     if (showServer) ServerDialog(onDismiss = { showServer = false })
 }
 
@@ -90,6 +101,7 @@ fun SettingsContent(
     onLogout: () -> Unit,
     keepSignedIn: Boolean = false,
     onKeepSignedIn: (Boolean) -> Unit = {},
+    onEditProfessional: () -> Unit = {},
 ) {
     val c = HopeTheme.colors
     Column(
@@ -129,10 +141,13 @@ fun SettingsContent(
         profile?.let { AddressCard(psychologist = user.isPsychologist, known = it.address, knownLoaded = true) }
 
         profile?.psychologist?.let { psy ->
-            GroupSection(header = stringResource(R.string.professional_registration)) {
+            GroupSection(header = stringResource(R.string.professional_registration), footer = stringResource(R.string.professional_footer)) {
                 ListRow(stringResource(R.string.crp), icon = Icons.Rounded.Badge, iconBackground = Color(0xFF9A7428), value = psy.crp)
                 ListRow(stringResource(R.string.specialty_label), icon = Icons.Rounded.Psychology, iconBackground = Color(0xFF3A7733), value = psy.specialty, showDivider = true)
+                ListRow(stringResource(R.string.approach_label), icon = Icons.Rounded.Spa, iconBackground = Color(0xFF2F7A64), value = psy.therapeuticApproach ?: "—", showDivider = true)
                 ListRow(stringResource(R.string.session_fee_label), icon = Icons.Rounded.Payments, iconBackground = Color(0xFFC47A2C), value = formatCurrency(psy.sessionFee), showDivider = true)
+                ListRow(stringResource(R.string.contact_link_label), icon = Icons.Rounded.Link, iconBackground = Color(0xFF4A64B0), value = psy.contactLink ?: "—", showDivider = true)
+                ListRow(stringResource(R.string.professional_edit_row), icon = Icons.Rounded.Edit, iconBackground = Color(0xFF636366), chevron = true, showDivider = true, onClick = onEditProfessional)
             }
         }
 
