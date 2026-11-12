@@ -233,6 +233,12 @@ data class LoginRequest(val email: String, val password: String)
 data class LoginResponse(val message: String, val user: User)
 
 @Serializable
+data class RefreshRequest(val remember: Boolean)
+
+@Serializable
+data class RefreshResponse(val message: String = "", val remember: Boolean = false)
+
+@Serializable
 data class RegisterRequest(
     val userType: String,
     val name: String,

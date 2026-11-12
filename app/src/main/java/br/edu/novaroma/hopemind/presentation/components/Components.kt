@@ -343,6 +343,7 @@ fun ListRow(
     chevron: Boolean = false,
     destructive: Boolean = false,
     onClick: (() -> Unit)? = null,
+    trailing: (@Composable () -> Unit)? = null,
 ) {
     val c = HopeTheme.colors
     Column {
@@ -373,6 +374,7 @@ fun ListRow(
             }
             if (value != null) Text(value, style = HopeTheme.type.body, color = c.label2, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
             if (chevron) Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, null, tint = c.label3)
+            trailing?.invoke()
         }
     }
 }

@@ -14,7 +14,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import br.edu.novaroma.hopemind.presentation.screen.KeepSignedInDialog
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -72,6 +77,17 @@ fun AppNavHost(session: SessionViewModel) {
 
     fun resetTo(route: String) = nav.navigate(route) { popUpTo(nav.graph.id) { inclusive = true } }
 
+    // Depois do login (ou do cadastro), pergunta se a sessão deve ficar salva no aparelho.
+    val scope = rememberCoroutineScope()
+    var justSignedIn by remember { mutableStateOf<User?>(null) }
+    justSignedIn?.let { u ->
+        KeepSignedInDialog(u.name) { keep ->
+            justSignedIn = null
+            scope.launch { container.auth.setKeepSignedIn(keep) }
+            resetTo(homeFor(u))
+        }
+    }
+
     NavHost(
         navController = nav,
         startDestination = Routes.SPLASH,
@@ -93,7 +109,7 @@ fun AppNavHost(session: SessionViewModel) {
             LoginScreen(
                 onBack = { nav.popBackStack() },
                 onRegister = { nav.navigate(Routes.REGISTER) { popUpTo(Routes.WELCOME) } },
-                onLoggedIn = { resetTo(homeFor(it)) },
+                onLoggedIn = { justSignedIn = it },
             )
         }
 
@@ -101,7 +117,7 @@ fun AppNavHost(session: SessionViewModel) {
             RegisterScreen(
                 onBack = { nav.popBackStack() },
                 onLogin = { nav.navigate(Routes.LOGIN) { popUpTo(Routes.WELCOME) } },
-                onRegistered = { resetTo(homeFor(it)) },
+                onRegistered = { justSignedIn = it },
             )
         }
 

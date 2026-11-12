@@ -18,13 +18,16 @@ import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Payments
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Phone
+import androidx.compose.material.icons.rounded.PhonelinkLock
 import androidx.compose.material.icons.rounded.Psychology
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,6 +56,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
+import kotlinx.coroutines.launch
 
 @Composable
 fun SettingsRoute(user: User, padding: PaddingValues, onQuestionnaire: () -> Unit, onAbout: () -> Unit, onLogout: () -> Unit) {
@@ -60,9 +64,15 @@ fun SettingsRoute(user: User, padding: PaddingValues, onQuestionnaire: () -> Uni
     var profile by remember { mutableStateOf<Profile?>(null) }
     val theme by container.prefs.theme.collectAsStateWithLifecycle()
     var showServer by remember { mutableStateOf(false) }
+    var keepSignedIn by remember { mutableStateOf(container.auth.keepSignedIn) }
+    val scope = rememberCoroutineScope()
     LaunchedEffect(Unit) { profile = container.auth.profile().getOrNull() }
 
-    SettingsContent(user, profile, theme, container.prefs.apiUrl, padding, container.prefs::setTheme, onQuestionnaire, onAbout, { showServer = true }, onLogout)
+    SettingsContent(
+        user, profile, theme, container.prefs.apiUrl, padding, container.prefs::setTheme, onQuestionnaire, onAbout, { showServer = true }, onLogout,
+        keepSignedIn = keepSignedIn,
+        onKeepSignedIn = { keep -> keepSignedIn = keep; scope.launch { container.auth.setKeepSignedIn(keep) } },
+    )
     if (showServer) ServerDialog(onDismiss = { showServer = false })
 }
 
@@ -78,6 +88,8 @@ fun SettingsContent(
     onAbout: () -> Unit,
     onServer: () -> Unit,
     onLogout: () -> Unit,
+    keepSignedIn: Boolean = false,
+    onKeepSignedIn: (Boolean) -> Unit = {},
 ) {
     val c = HopeTheme.colors
     Column(
@@ -146,7 +158,13 @@ fun SettingsContent(
         }
 
         GroupSection(header = stringResource(R.string.app_section)) {
-            ListRow(stringResource(R.string.about), icon = Icons.Rounded.Info, iconBackground = Color(0xFF8E8E93), chevron = true, onClick = onAbout)
+            ListRow(
+                stringResource(R.string.keep_signed_in_setting), icon = Icons.Rounded.PhonelinkLock, iconBackground = Color(0xFF3A7733),
+                subtitle = stringResource(R.string.keep_signed_in_setting_hint),
+                onClick = { onKeepSignedIn(!keepSignedIn) },
+                trailing = { Switch(checked = keepSignedIn, onCheckedChange = onKeepSignedIn) },
+            )
+            ListRow(stringResource(R.string.about), icon = Icons.Rounded.Info, iconBackground = Color(0xFF8E8E93), chevron = true, showDivider = true, onClick = onAbout)
             ListRow(
                 stringResource(R.string.server_title), icon = Icons.Rounded.Dns, iconBackground = Color(0xFF636366),
                 subtitle = serverUrl, chevron = true, showDivider = true, onClick = onServer,

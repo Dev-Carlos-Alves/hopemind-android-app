@@ -6,7 +6,7 @@ import br.edu.novaroma.hopemind.ui.theme.ThemeMode
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-/** Preferências locais do app: aparência e endereço do servidor. */
+/** Preferências locais do app: aparência, endereço do servidor e "manter conectado". */
 class Prefs(context: Context) {
     private val sp = context.getSharedPreferences("hopemind.prefs", Context.MODE_PRIVATE)
 
@@ -29,8 +29,18 @@ class Prefs(context: Context) {
 
     fun resetApiUrl() = sp.edit().remove(KEY_API).apply()
 
+    /**
+     * "Manter conectado": a sessão fica salva no aparelho e o app entra direto no perfil ao abrir.
+     * O padrão é true só para instalações antigas, que já guardavam a sessão; quem faz login
+     * responde à pergunta e a escolha é gravada aqui.
+     */
+    var keepSignedIn: Boolean
+        get() = sp.getBoolean(KEY_KEEP_SIGNED_IN, true)
+        set(value) = sp.edit().putBoolean(KEY_KEEP_SIGNED_IN, value).apply()
+
     private companion object {
         const val KEY_THEME = "theme"
         const val KEY_API = "api_url"
+        const val KEY_KEEP_SIGNED_IN = "keep_signed_in"
     }
 }

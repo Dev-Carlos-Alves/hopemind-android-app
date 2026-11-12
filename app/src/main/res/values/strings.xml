@@ -220,6 +220,12 @@
     <string name="about">About HopeMind</string>
     <string name="app_section">App</string>
     <string name="logout">Sign out</string>
+    <string name="keep_signed_in_title">Stay signed in?</string>
+    <string name="keep_signed_in_text">Next time you open HopeMind on this phone, we\'ll take you straight to %1$s\'s account — no e-mail or password needed. You can change this anytime in Settings.</string>
+    <string name="keep_signed_in_yes">Stay signed in</string>
+    <string name="keep_signed_in_no">Not now</string>
+    <string name="keep_signed_in_setting">Stay signed in on this device</string>
+    <string name="keep_signed_in_setting_hint">Open the app straight into your account</string>
     <string name="footer_credit">HopeMind · a SafeMindLive project</string>
 
     <!-- About -->

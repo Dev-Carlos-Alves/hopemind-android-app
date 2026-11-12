@@ -126,6 +126,9 @@ class ScreenshotTest {
 
     // Telas inteiras (altura grande) para ver todas as seções de uma vez.
     @Config(qualifiers = "pt-rBR-w393dp-h3600dp-mdpi")
+    @Test fun t24_settingsKeepSignedIn() = shot("24_ajustes_manter_conectado") {
+        InTabs(ana, Routes.SETTINGS) { SettingsContent(ana, profile, ThemeMode.AUTO, "http://10.0.2.2:3000/api/", it, {}, {}, {}, {}, {}, keepSignedIn = true) }
+    }
     @Test fun t20_homeFull() = shot("20_home_inteira") { InTabs(ana, Routes.HOME) { HomeScreen(ana, it, {}, {}, {}) } }
 
     @Config(qualifiers = "pt-rBR-w393dp-h3600dp-mdpi")

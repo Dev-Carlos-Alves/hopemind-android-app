@@ -16,7 +16,7 @@ import br.edu.novaroma.hopemind.domain.model.Safety
 class AppContainer(private val context: Context) {
     val prefs = Prefs(context)
 
-    var client: ApiClient = ApiClient(context, prefs.apiUrl)
+    var client: ApiClient = ApiClient(context, prefs.apiUrl, prefs.keepSignedIn)
         private set
     val api: HopeMindApi get() = client.api
 
@@ -34,6 +34,6 @@ class AppContainer(private val context: Context) {
     /** Troca o endereço da API (útil para testar em celular físico na mesma rede). */
     fun changeServer(url: String?) {
         if (url.isNullOrBlank()) prefs.resetApiUrl() else prefs.apiUrl = url
-        client = ApiClient(context, prefs.apiUrl)
+        client = ApiClient(context, prefs.apiUrl, prefs.keepSignedIn)
     }
 }

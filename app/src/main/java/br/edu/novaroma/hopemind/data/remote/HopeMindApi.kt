@@ -1,6 +1,8 @@
 package br.edu.novaroma.hopemind.data.remote
 
 import br.edu.novaroma.hopemind.domain.model.AddressRequest
+import br.edu.novaroma.hopemind.domain.model.RefreshRequest
+import br.edu.novaroma.hopemind.domain.model.RefreshResponse
 import br.edu.novaroma.hopemind.domain.model.Appointment
 import br.edu.novaroma.hopemind.domain.model.CepAddress
 import br.edu.novaroma.hopemind.domain.model.BookRequest
@@ -26,6 +28,8 @@ interface HopeMindApi {
     @POST("auth/login") suspend fun login(@Body body: LoginRequest): LoginResponse
     @POST("auth/register") suspend fun register(@Body body: RegisterRequest): MessageResponse
     @POST("auth/logout") suspend fun logout(): MessageResponse
+    /** Renova a sessão; com remember = true o servidor passa a validade para 30 dias ("manter conectado"). */
+    @POST("auth/refresh") suspend fun refresh(@Body body: RefreshRequest): RefreshResponse
     @GET("auth/me") suspend fun me(): Profile
     @PATCH("auth/me/address") suspend fun updateAddress(@Body body: AddressRequest): ProfileAddress
 
