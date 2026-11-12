@@ -18,6 +18,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import br.edu.novaroma.hopemind.presentation.screen.ForgotPasswordScreen
 import br.edu.novaroma.hopemind.presentation.screen.KeepSignedInDialog
 import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
@@ -110,6 +111,15 @@ fun AppNavHost(session: SessionViewModel) {
                 onBack = { nav.popBackStack() },
                 onRegister = { nav.navigate(Routes.REGISTER) { popUpTo(Routes.WELCOME) } },
                 onLoggedIn = { justSignedIn = it },
+                onForgot = { typed -> nav.navigate(Routes.FORGOT + "?login=" + android.net.Uri.encode(typed)) },
+            )
+        }
+
+        composable(Routes.FORGOT + "?login={login}") { entry ->
+            ForgotPasswordScreen(
+                onBack = { nav.popBackStack() },
+                onDone = { nav.popBackStack() },
+                initialLogin = entry.arguments?.getString("login").orEmpty(),
             )
         }
 

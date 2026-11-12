@@ -209,6 +209,13 @@ data class MatchPsychologist(
     val city: String? = null,
     /** Link de contato informado pelo psicólogo (WhatsApp, site, agenda). */
     val contactLink: String? = null,
+    // Perfil detalhado (aberto ao tocar na foto ou no nome).
+    val therapeuticApproach: String? = null,
+    val gender: String? = null,
+    val experience: String? = null,
+    val audiences: List<String> = emptyList(),
+    val demands: List<String> = emptyList(),
+    val experiencedWith: List<String> = emptyList(),
 )
 
 /* ───────────── Sessões ───────────── */
@@ -225,6 +232,38 @@ data class Appointment(
     val pacienteNome: String,
     val especialidade: String,
     val crp: String,
+    /** Perfil do paciente — só vem para o psicólogo da sessão. */
+    val paciente: PatientCard? = null,
+    /** Perfil do psicólogo — só vem para o paciente da sessão. */
+    val psicologo: PsychologistCard? = null,
+)
+
+@Serializable
+data class PatientCard(
+    val nome: String,
+    val idade: Int? = null,
+    val genero: String? = null,
+    /** O que o paciente contou sobre si no cadastro. */
+    val sobre: String? = null,
+    val prioridades: List<String> = emptyList(),
+    val outrosTemas: List<String> = emptyList(),
+    val modalidade: String? = null,
+    val bairro: String? = null,
+    val cidade: String? = null,
+)
+
+@Serializable
+data class PsychologistCard(
+    val id: Int,
+    val nome: String,
+    val crp: String,
+    val especialidade: String,
+    val abordagem: String? = null,
+    val biografia: String? = null,
+    val valorSessao: String? = null,
+    val contato: String? = null,
+    val bairro: String? = null,
+    val cidade: String? = null,
 )
 
 /** Dados mínimos para abrir a folha de agendamento. */
@@ -240,7 +279,14 @@ data class Bookable(
 /* ───────────── Requisições ───────────── */
 
 @Serializable
-data class LoginRequest(val email: String, val password: String)
+/** login = e-mail ou CPF (com ou sem máscara). */
+data class LoginRequest(val login: String, val password: String)
+
+@Serializable
+data class ForgotPasswordRequest(val login: String)
+
+@Serializable
+data class ResetPasswordRequest(val login: String, val code: String, val password: String)
 
 @Serializable
 data class LoginResponse(val message: String, val user: User)

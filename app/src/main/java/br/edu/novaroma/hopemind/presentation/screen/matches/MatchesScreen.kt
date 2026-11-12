@@ -68,6 +68,7 @@ import br.edu.novaroma.hopemind.presentation.components.SafetyPanel
 import br.edu.novaroma.hopemind.presentation.components.SegmentedControl
 import br.edu.novaroma.hopemind.presentation.components.Skeleton
 import br.edu.novaroma.hopemind.presentation.screen.AddressCard
+import br.edu.novaroma.hopemind.presentation.screen.PsychologistProfileSheet
 import br.edu.novaroma.hopemind.presentation.screen.triage.QuestionnaireCard
 import br.edu.novaroma.hopemind.presentation.screen.triage.SubmitOutcome
 import br.edu.novaroma.hopemind.presentation.screen.triage.TriageState
@@ -93,6 +94,7 @@ fun MatchesRoute(user: User, padding: PaddingValues, openQuestionnaire: Boolean,
     val context = LocalContext.current
     var booking by remember { mutableStateOf<Bookable?>(null) }
     var explaining by remember { mutableStateOf<MatchItem?>(null) }
+    var profileOf by remember { mutableStateOf<MatchItem?>(null) }
     val list = rememberLazyListState()
 
     LaunchedEffect(Unit) { if (openQuestionnaire || !user.hasTriage) vm.setQuestionnaireOpen(true) }
@@ -112,6 +114,7 @@ fun MatchesRoute(user: User, padding: PaddingValues, openQuestionnaire: Boolean,
         onToggleMore = vm::toggleShowAll,
         onBook = { m -> booking = m.toBookable() },
         onExplain = { explaining = it },
+        onProfile = { profileOf = it },
         onAnswer = triageVm::setAnswer,
         onBack = triageVm::back,
         onNext = {
@@ -137,6 +140,9 @@ fun MatchesRoute(user: User, padding: PaddingValues, openQuestionnaire: Boolean,
         }
     }
     explaining?.let { m -> ExplainSheet(m, state.data?.algorithmVersion.orEmpty(), onDismiss = { explaining = null }) }
+    profileOf?.let { m ->
+        PsychologistProfileSheet(m.psychologist, m.distanceKm, onBook = { booking = m.toBookable() }, onDismiss = { profileOf = null })
+    }
 }
 
 private fun MatchItem.toBookable() = Bookable(
@@ -166,6 +172,7 @@ fun MatchesContent(
     onToggleMore: () -> Unit = {},
     onBook: (MatchItem) -> Unit = {},
     onExplain: (MatchItem) -> Unit = {},
+    onProfile: (MatchItem) -> Unit = {},
     onAnswer: (String, JsonElement?) -> Unit = { _, _ -> },
     onBack: () -> Unit = {},
     onNext: () -> Unit = {},
@@ -269,14 +276,14 @@ fun MatchesContent(
             else -> {
                 if (top.isEmpty()) item { Text(stringResource(R.string.none_in_top), style = HopeTheme.type.callout, color = c.label2) }
                 itemsIndexed(top, key = { _, m -> m.psychologistId }) { _, m ->
-                    MatchCard(m, rank[m.psychologistId] ?: 0, onBook = { onBook(m) }, onExplain = { onExplain(m) })
+                    MatchCard(m, rank[m.psychologistId] ?: 0, onBook = { onBook(m) }, onExplain = { onExplain(m) }, onProfile = { onProfile(m) })
                 }
                 if (rest.isNotEmpty()) {
                     item { MoreToggle(rest.size, state.showAll, onToggleMore) }
                     if (state.showAll) {
                         item { Text(stringResource(R.string.other_options), style = HopeTheme.type.title3, color = c.label, modifier = Modifier.padding(top = 4.dp)) }
                         itemsIndexed(rest, key = { _, m -> m.psychologistId }) { _, m ->
-                            MatchCard(m, rank[m.psychologistId] ?: 0, onBook = { onBook(m) }, onExplain = { onExplain(m) })
+                            MatchCard(m, rank[m.psychologistId] ?: 0, onBook = { onBook(m) }, onExplain = { onExplain(m) }, onProfile = { onProfile(m) })
                         }
                     }
                 }

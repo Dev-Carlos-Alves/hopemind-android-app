@@ -54,7 +54,7 @@ import br.edu.novaroma.hopemind.ui.theme.HopeTheme
 import kotlinx.coroutines.launch
 
 @Composable
-fun LoginScreen(onBack: () -> Unit, onRegister: () -> Unit, onLoggedIn: (User) -> Unit) {
+fun LoginScreen(onBack: () -> Unit, onRegister: () -> Unit, onLoggedIn: (User) -> Unit, onForgot: (String) -> Unit = {}) {
     val container = appContainer()
     val scope = rememberCoroutineScope()
     val c = HopeTheme.colors
@@ -96,10 +96,13 @@ fun LoginScreen(onBack: () -> Unit, onRegister: () -> Unit, onLoggedIn: (User) -
             HopeTextField(
                 value = email,
                 onValueChange = { email = it },
-                label = stringResource(R.string.email),
+                label = stringResource(R.string.email_or_cpf),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             )
             PasswordField(password, { password = it }, stringResource(R.string.password))
+            TextButton(onClick = { onForgot(email) }, modifier = Modifier.align(Alignment.End)) {
+                Text(stringResource(R.string.forgot_link), style = HopeTheme.type.subhead.copy(fontWeight = FontWeight.SemiBold), color = c.tint)
+            }
 
             HopeButton(
                 stringResource(R.string.login_button),

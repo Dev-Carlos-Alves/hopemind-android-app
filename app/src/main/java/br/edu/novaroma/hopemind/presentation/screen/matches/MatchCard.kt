@@ -67,7 +67,7 @@ fun ReasonLine(text: String, note: Boolean = false) {
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun MatchCard(match: MatchItem, rank: Int, onBook: () -> Unit, onExplain: () -> Unit) {
+fun MatchCard(match: MatchItem, rank: Int, onBook: () -> Unit, onExplain: () -> Unit, onProfile: () -> Unit = {}) {
     val c = HopeTheme.colors
     val p = match.psychologist
     val (bandText, bandTone) = bandLabel(match.band)
@@ -75,8 +75,12 @@ fun MatchCard(match: MatchItem, rank: Int, onBook: () -> Unit, onExplain: () -> 
     HopeCard {
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                Avatar(p.name, 60.dp)
-                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                val openProfile = stringResource(R.string.profile_open, p.name)
+                Box(Modifier.clip(CircleShape).clickable(onClickLabel = openProfile, onClick = onProfile)) { Avatar(p.name, 60.dp) }
+                Column(
+                    Modifier.weight(1f).clickable(onClickLabel = openProfile, onClick = onProfile),
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                ) {
                     Text(p.name, style = HopeTheme.type.headline, color = c.label)
                     Text(p.specialty, style = HopeTheme.type.footnote, color = c.label2)
                     Text(p.crp, style = HopeTheme.type.caption, color = c.label3)
