@@ -13,7 +13,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.Chat
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Info
@@ -110,6 +114,18 @@ fun MatchCard(match: MatchItem, rank: Int, onBook: () -> Unit, onExplain: () -> 
                 Column(Modifier.weight(1f)) {
                     Text(formatCurrency(p.sessionFee), style = HopeTheme.type.headline, color = c.label)
                     Text(stringResource(R.string.per_session), style = HopeTheme.type.caption, color = c.label2)
+                }
+                p.contactLink?.takeIf { it.isNotBlank() }?.let { link ->
+                    val uriHandler = LocalUriHandler.current
+                    val label = stringResource(R.string.contact_professional, p.name)
+                    Box(
+                        Modifier.padding(end = 8.dp).size(44.dp).clip(CircleShape).background(c.fill)
+                            .clickable(onClickLabel = label) { runCatching { uriHandler.openUri(link) } }
+                            .semantics { contentDescription = label },
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(Icons.AutoMirrored.Rounded.Chat, null, tint = c.label, modifier = Modifier.size(20.dp))
+                    }
                 }
                 HopeButton(stringResource(R.string.see_times), onBook, variant = ButtonVariant.TINTED, icon = Icons.Rounded.CalendarMonth)
             }

@@ -61,6 +61,17 @@ data class PsychologistInfo(
     val therapeuticApproach: String? = null,
     val biography: String? = null,
     val sessionFee: String? = null,
+    val contactLink: String? = null,
+)
+
+/** PATCH auth/me/profile (US-11). Texto vazio em biography/contactLink apaga o campo. */
+@Serializable
+data class ProfessionalProfileRequest(
+    val specialty: String,
+    val therapeuticApproach: String,
+    val biography: String,
+    val sessionFee: String,
+    val contactLink: String,
 )
 
 /* ───────────── Endereço (CEP) ───────────── */
@@ -196,6 +207,8 @@ data class MatchPsychologist(
     val modalities: List<String> = emptyList(),
     val neighborhood: String? = null,
     val city: String? = null,
+    /** Link de contato informado pelo psicólogo (WhatsApp, site, agenda). */
+    val contactLink: String? = null,
 )
 
 /* ───────────── Sessões ───────────── */

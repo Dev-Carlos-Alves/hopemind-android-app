@@ -40,6 +40,7 @@ class ApiContractTest {
               "id": 7, "name": "Dra. Sintética", "crp": "CRP 02/12345", "specialty": "Psicologia clínica",
               "approaches": ["Terapia Cognitivo-Comportamental"], "biography": null, "sessionFee": "150",
               "modalities": ["online"], "neighborhood": "Espinheiro", "city": "Recife",
+              "contactLink": "https://wa.me/5581999990000",
               "campoNovoDaApi": "ignorado"
             }
           }]
@@ -57,6 +58,7 @@ class ApiContractTest {
         assertEquals(1.04, m.distanceKm!!, 1e-9)
         assertEquals("150", m.psychologist.sessionFee)
         assertNull(m.psychologist.biography)
+        assertEquals("https://wa.me/5581999990000", m.psychologist.contactLink)
         assertEquals(7, m.components.size)
     }
 
