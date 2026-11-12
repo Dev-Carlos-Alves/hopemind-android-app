@@ -220,6 +220,12 @@
     <string name="about">Sobre o HopeMind</string>
     <string name="app_section">App</string>
     <string name="logout">Sair da conta</string>
+    <string name="keep_signed_in_title">Manter conectado?</string>
+    <string name="keep_signed_in_text">Da próxima vez que você abrir o HopeMind neste celular, entramos direto na conta de %1$s, sem pedir e-mail e senha. Você pode mudar isso quando quiser em Ajustes.</string>
+    <string name="keep_signed_in_yes">Manter conectado</string>
+    <string name="keep_signed_in_no">Agora não</string>
+    <string name="keep_signed_in_setting">Manter conectado neste aparelho</string>
+    <string name="keep_signed_in_setting_hint">Abrir o app direto na sua conta</string>
     <string name="footer_credit">HopeMind · um projeto SafeMindLive</string>
 
     <!-- Sobre -->

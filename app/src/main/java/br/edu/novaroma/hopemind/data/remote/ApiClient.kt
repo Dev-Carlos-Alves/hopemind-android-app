@@ -25,19 +25,36 @@ val AppJson = Json {
 
 /**
  * A API do HopeMind guarda a sessão em cookies httpOnly (access + refresh).
- * No app, o OkHttp faz o papel do navegador: este CookieJar guarda os cookies
- * em SharedPreferences para a sessão sobreviver ao fechar o app.
+ * No app, o OkHttp faz o papel do navegador: este CookieJar guarda os cookies.
+ *
+ * Com "manter conectado" ([persist] = true) eles também vão para SharedPreferences e a sessão
+ * sobrevive ao fechar o app; sem isso ficam só na memória e somem quando o app é encerrado.
  */
-class PersistentCookieJar(context: Context) : CookieJar {
+class PersistentCookieJar(context: Context, persist: Boolean = true) : CookieJar {
     private val prefs = context.getSharedPreferences("hopemind.cookies", Context.MODE_PRIVATE)
     private val cache = mutableMapOf<String, Cookie>()
+    /** Origem (esquema://host:porta/) de cada cookie, necessária para gravá-lo e relê-lo. */
+    private val origins = mutableMapOf<String, String>()
+
+    /** Liga/desliga a gravação no aparelho. Desligar apaga o que estava salvo (a sessão atual continua em memória). */
+    var persist: Boolean = persist
+        @Synchronized set(value) {
+            field = value
+            if (value) writeAll() else prefs.edit().clear().apply()
+        }
 
     init {
-        prefs.all.values.filterIsInstance<String>().forEach { raw ->
-            val parts = raw.split('\u0000', limit = 2)
-            if (parts.size == 2) {
-                parts[0].toHttpUrlOrNull()?.let { url -> Cookie.parse(url, parts[1])?.let { cache[key(it)] = it } }
+        if (persist) {
+            prefs.all.values.filterIsInstance<String>().forEach { raw ->
+                val parts = raw.split('\u0000', limit = 2)
+                if (parts.size == 2) {
+                    parts[0].toHttpUrlOrNull()?.let { url ->
+                        Cookie.parse(url, parts[1])?.let { cache[key(it)] = it; origins[key(it)] = parts[0] }
+                    }
+                }
             }
+        } else {
+            prefs.edit().clear().apply()
         }
     }
 
@@ -47,11 +64,19 @@ class PersistentCookieJar(context: Context) : CookieJar {
         cookies.forEach { c ->
             val k = key(c)
             if (c.expiresAt < System.currentTimeMillis()) {
-                cache.remove(k); editor.remove(k)
+                cache.remove(k); origins.remove(k); editor.remove(k)
             } else {
-                cache[k] = c; editor.putString(k, "${url.scheme}://${url.host}:${url.port}/\u0000$c")
+                cache[k] = c
+                origins[k] = "${url.scheme}://${url.host}:${url.port}/"
+                if (persist) editor.putString(k, "${origins[k]}\u0000$c")
             }
         }
+        editor.apply()
+    }
+
+    private fun writeAll() {
+        val editor = prefs.edit().clear()
+        cache.forEach { (k, c) -> origins[k]?.let { editor.putString(k, "$it\u0000$c") } }
         editor.apply()
     }
 
@@ -64,7 +89,7 @@ class PersistentCookieJar(context: Context) : CookieJar {
 
     @Synchronized
     fun clear() {
-        cache.clear(); prefs.edit().clear().apply()
+        cache.clear(); origins.clear(); prefs.edit().clear().apply()
     }
 
     private fun key(c: Cookie) = "${c.domain}|${c.path}|${c.name}"
@@ -86,8 +111,8 @@ private class RefreshAuthenticator(private val baseUrl: String, private val cook
     }
 }
 
-class ApiClient(context: Context, val baseUrl: String) {
-    val cookies = PersistentCookieJar(context)
+class ApiClient(context: Context, val baseUrl: String, persistSession: Boolean = true) {
+    val cookies = PersistentCookieJar(context, persistSession)
 
     private val http = OkHttpClient.Builder()
         .cookieJar(cookies)

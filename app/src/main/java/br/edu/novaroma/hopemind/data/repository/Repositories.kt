@@ -8,6 +8,7 @@ import br.edu.novaroma.hopemind.domain.model.Appointment
 import br.edu.novaroma.hopemind.domain.model.CepAddress
 import br.edu.novaroma.hopemind.domain.model.BookRequest
 import br.edu.novaroma.hopemind.domain.model.LoginRequest
+import br.edu.novaroma.hopemind.domain.model.RefreshRequest
 import br.edu.novaroma.hopemind.domain.model.MatchResponse
 import br.edu.novaroma.hopemind.domain.model.MySubmission
 import br.edu.novaroma.hopemind.domain.model.Profile
@@ -34,9 +35,24 @@ class AuthRepository(private val container: AppContainer) {
         return _user.value
     }
 
-    suspend fun login(email: String, password: String): Result<User> =
-        apiCall("Não foi possível entrar. Verifique suas credenciais.") { api.login(LoginRequest(email.trim(), password)).user }
+    /** A sessão de um novo login fica só na memória até a pessoa responder "manter conectado?". */
+    suspend fun login(email: String, password: String): Result<User> {
+        container.client.cookies.persist = false
+        return apiCall("Não foi possível entrar. Verifique suas credenciais.") { api.login(LoginRequest(email.trim(), password)).user }
             .onSuccess { _user.value = it }
+    }
+
+    val keepSignedIn: Boolean get() = container.prefs.keepSignedIn
+
+    /**
+     * "Manter conectado": grava (ou apaga) a sessão no aparelho e avisa a API, que passa a
+     * renovar a sessão por 30 dias (ou volta aos 7 dias padrão). Falha de rede não desfaz a escolha.
+     */
+    suspend fun setKeepSignedIn(keep: Boolean) {
+        container.prefs.keepSignedIn = keep
+        container.client.cookies.persist = keep
+        apiCall { api.refresh(RefreshRequest(remember = keep)) }
+    }
 
     suspend fun register(request: RegisterRequest): Result<Unit> =
         apiCall("Não foi possível concluir o cadastro.") { api.register(request); Unit }
@@ -57,6 +73,7 @@ class AuthRepository(private val container: AppContainer) {
     suspend fun logout() {
         apiCall { api.logout() }
         container.client.cookies.clear()
+        container.prefs.keepSignedIn = false
         _user.value = null
     }
 }
